@@ -89,6 +89,65 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
       <xacro:kinect_camera_gazebo prefix="camera"/>
     </xacro:if>
 
+    <xacro:if value="$(arg velodyne_enabled)">
+	<link name="velodyne">
+	  <visual name="base_visual">
+	    <origin rpy="0 0 3.1415" xyz="0 0 -0.002"/>
+	    <geometry name="husky_geom">
+	      <mesh filename="package://velodyne_description/meshes/VLP16_scan.dae" />
+	    </geometry>
+	    <material name="VelodyneDarkGreen">
+	      <color rgba="0.0 0.28 0.0 1.0"/>
+	    </material>
+	  </visual>
+        </link>
+	<gazebo reference="velodyne">
+	  <sensor type="ray" name="velodyne-VLP16">
+	    <pose>0 0 0 0 0 0</pose>
+	    <visualize>false</visualize>
+	    <update_rate>10</update_rate>
+	    <ray>
+	      <scan>
+		<horizontal>
+		  <samples>1875</samples>
+		  <resolution>1</resolution>
+		  <min_angle>-3.1415926535897931</min_angle>
+		  <max_angle> 3.1415926535897931</max_angle>
+		</horizontal>
+		<vertical>
+		  <samples>16</samples>
+		  <resolution>1</resolution>
+		  <min_angle>-${15.0*3.1415926535897931/180.0}</min_angle>
+		  <max_angle> ${15.0*3.1415926535897931/180.0}</max_angle>
+		</vertical>
+	      </scan>
+	      <range>
+		<min>0.055</min>
+		<max>140.0</max>
+		<resolution>0.001</resolution>
+	      </range>
+	      <noise>
+		<type>gaussian</type>
+		<mean>0.0</mean>
+		<stddev>0.0</stddev>
+	      </noise>
+	    </ray>
+	    <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_laser.so">
+	      <topicName>velodyne_points</topicName>
+	      <frameName>velodyne</frameName>
+	      <min_range>0.9</min_range>
+	      <max_range>130.0</max_range>
+	      <gaussianNoise>0.008</gaussianNoise>
+	    </plugin>
+	  </sensor>
+	</gazebo>
+	<joint name="base_velodyne_joint" type="fixed">
+	  <origin rpy="0 0 0" xyz="-0.043 0 0.5"/>
+	  <parent link="base_link"/>
+	  <child link="velodyne"/>
+	</joint>
+    </xacro:if>
+    
   </xacro:macro>
 
 </robot>
